@@ -18,7 +18,8 @@ class DSStartupCheck:
     def backend_switcher(self):
         if self.PYGLET_BACKEND:
             print("Launching pyglet backend")
-            DSpygletBackend()
+            pygletb = DSpygletBackend()
+            pygletb.run()
         else:
             print("pyqt5 is under constructing")
 
