@@ -5,7 +5,8 @@ logging.basicConfig(format='%(asctime)s %(message)s')
 
 class DSpygletBackend:
     def __init__(self):
-        win = pyglet.window.Window()
+        win = pyglet.window.Window(vsync=False)
+        #win = pyglet.window.Window()
         self.batch = pyglet.graphics.Batch()
         self.i = 0
 
@@ -14,15 +15,18 @@ class DSpygletBackend:
             
             canvas = self.open_tablet(win)
             self.canvas_reporter(canvas)
+
             return
 
         @win.event
         def on_mouse_press(x, y, button, modifiers):
+            #self.draw_and_update(x, y)
             self.draw(x, y)
             return
 
         @win.event
         def on_mouse_drag(x, y, dx, dy, buttons, modifiers):
+            #self.draw_and_update(x, y)
             return
 
         @win.event
@@ -74,12 +78,17 @@ class DSpygletBackend:
         def on_motion(cursor, x, y, pressure, a, b):
             #self.motion_reporter(x, y, pressure, a, b)
             if pressure > 0:
+                #self.draw_and_update(x, y)
                 self.draw(x, y)
 
             return
         
         return
         
+    def draw_and_update(self, x, y):
+        self.draw(x, y)
+        self.update(None)
+
     def draw(self, x, y):
         print('drawing: %s %s' % (x, y))
         pyglet.graphics.draw(1, pyglet.gl.GL_POINTS,
@@ -94,5 +103,6 @@ class DSpygletBackend:
         self.batch.draw()
 
     def run(self):
-        pyglet.clock.schedule_interval(self.update, 1/60.0)
+        pyglet.clock.schedule_interval(self.update, 1/10.0)
+        #pyglet.clock.schedule(self.update)
         pyglet.app.run()
