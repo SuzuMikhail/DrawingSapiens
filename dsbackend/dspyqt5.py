@@ -9,20 +9,16 @@ class DSpyqt5Backend(QWidget):
         self.pen_x = 0
         self.pen_y = 0
         self.pen_pressure = 0
-        self.text = ""
 
         self.pevent_called_times = 0
 
-        self.resize(640, 480)
-        self.setWindowTitle("画 图 人")
+        self.resize(800, 600)
 
     def tabletEvent(self, tevent):
         self.pen_x = tevent.globalX()
         self.pen_y = tevent.globalY()
         self.pen_pressure = int(tevent.pressure() * 100)
 
-        print(tevent.PointerType)
-        print(tevent.TabletDevice)
 
         if tevent.type() == QTabletEvent.TabletPress:
             self.pen_is_down = True
@@ -51,16 +47,16 @@ class DSpyqt5Backend(QWidget):
         self.update()
 
     def paintEvent(self, event):
-        text = self.text
-        i = text.find("\n\n")
-        
-        if i >= 0:
-            text = text.left(i)
-        
-        qp = QPainter()
-        qp.begin(self)
-        qp.setFont(QFont('SimHei', 40))
-        qp.drawText(self.rect(), Qt.AlignTop | Qt.AlignLeft, text)
-        qp.end()
+        qp = QPainter(self)
+        #qp.begin(self)
+        print('darwing')
+        qp.setBackground(Qt.white)
+        #qp.setPen(Qt.NoPen)
+        qp.setBrush(Qt.black)
+        qp.setPen(QPen(Qt.black, 2, Qt.SolidLine))
+        #qp.drawPoint(self.pen_x, self.pen_y)
+        #qp.drawRect(self.pen_x, self.pen_y, 20, 20)
+        qp.drawEllipse(self.pen_x, self.pen_y, 20, 20)
+        #qp.end()
 
 
