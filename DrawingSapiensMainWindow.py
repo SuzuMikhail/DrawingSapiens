@@ -7,6 +7,7 @@ from PyQt5.QtWidgets import *
 
 from dsbackend.dspyglet import DSpygletBackend
 from dsbackend.dspyqt5 import DSpyqt5Backend
+import DSpyqt5MainWindow
 
 
 class DSStartupCheck:
@@ -34,11 +35,11 @@ class DSStartupCheck:
             b.run()
         elif i is self.PYQT5_BACKEND:
             print("pyqt5 is under constructing")
-            app = QApplication(sys.argv)
-            b = DSpyqt5Backend()
-            b.show()
-
-            app.exec()
+            canvas = DSpyqt5Backend
+            win = DSpyqt5MainWindow(canvas)
+            win.resize(800, 600)
+            win.show()
+            
         else:
             print("No backend have been chosed.")
 
