@@ -1,11 +1,10 @@
-import sys
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-class DrawingSapiensWindow(QWidget):
+class DSpyqt5Backend(QWidget):
     def __init__(self, parent=None):
-        super(DrawingSapiensWindow, self).__init__(parent)
+        super(DSpyqt5Backend, self).__init__(parent)
         self.pen_is_down = False
         self.pen_x = 0
         self.pen_y = 0
@@ -64,8 +63,4 @@ class DrawingSapiensWindow(QWidget):
         qp.drawText(self.rect(), Qt.AlignTop | Qt.AlignLeft, text)
         qp.end()
 
-app = QApplication(sys.argv)
-mf = DrawingSapiensWindow()
-mf.show()
-#sys.exit(app.exec_())
-app.exec()
+
