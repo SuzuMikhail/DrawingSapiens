@@ -1,3 +1,5 @@
+from enum import Enum
+
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
@@ -9,6 +11,14 @@ class DSpyqt5Backend(QWidget):
             self.pressure = 0
             self.rotation = 0
 
+    class Valuator(Enum):
+        PressureValuator = auto()
+        TangentialPressureValuator = auto()
+        TiltValuator = auto()
+        VTiltValuator = auto()
+        HTiltValuator = auto()
+        NoValuator = auto()
+
     def __init__(self, parent=None):
         super(DSpyqt5Backend, self).__init__(parent)
         self.pen_is_down = False
@@ -16,7 +26,14 @@ class DSpyqt5Backend(QWidget):
 
         self.pevent_called_times = 0
 
+        self.alphaChannelValuator = Valuator.TangentialPressureValuator
+        self.colorSaturationValuator = Valuator.NoValuator
+        self.lineWidthValuator = Valuator.PressureValuator
+
+        self.color = Qt.red
         self.pixmap = QPixmap()
+        self.brush = None
+        self.pen = None
 
         self.resize(800, 600)
         self.setAutoFillBackground(True)
@@ -61,6 +78,12 @@ class DSpyqt5Backend(QWidget):
         qp.drawPixmap(event.rect().topLeft(), self.pixmap, pixmap_portion)
         qp.end()
 
+    def resizeEvent(self, event):
+        pass
+
+
+
+
     def init_pixmap(self):
         dpr = self.devicePixelRatioF()
         new_pixmap = QPixmap(qRound(self.width() * dpr), qRound(self.height() * dpr))
@@ -86,6 +109,30 @@ class DSpyqt5Backend(QWidget):
             return True
         return False
 
+    def clear(self):
+        pass
+
+    def setAlphaChannelValuator(self, t):
+        self.alphaChannelValuator = t
+
+    def setColorSaturationValuator(self, t):
+        self.colorSaturationValuator = t
+
+    def setLineWidthType(self, t):
+        self.lineWidthValuator = t
+    
+    def setColor(self, c):
+        if c.isVaild():
+            self.color = c
+
+    def color(self):
+        return self.color
+
+    def setTabletDevice(self, event):
+        self.updateCursor(event)
+
+
+
     def event2last_point(self, tevent):
         self.last_point.pos = tevent.posF()
         self.last_point.pressure = tevent.pressure()
@@ -110,3 +157,12 @@ class DSpyqt5Backend(QWidget):
             self.update()
             #print("unknown devices")
     
+    def brushPattern(self, value):
+        pass
+
+    def updateBrush(self, event):
+        pass
+
+    def updateCursor(self, event):
+        pass
+
