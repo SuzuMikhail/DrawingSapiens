@@ -12,12 +12,12 @@ class DSpyqt5Backend(QWidget):
             self.rotation = 0
 
     class Valuator(Enum):
-        PressureValuator = auto()
-        TangentialPressureValuator = auto()
-        TiltValuator = auto()
-        VTiltValuator = auto()
-        HTiltValuator = auto()
-        NoValuator = auto()
+        PressureValuator = 1
+        TangentialPressureValuator = 2
+        TiltValuator = 3
+        VTiltValuator = 4
+        HTiltValuator = 5
+        NoValuator = 6
 
     def __init__(self, parent=None):
         super(DSpyqt5Backend, self).__init__(parent)
@@ -26,9 +26,9 @@ class DSpyqt5Backend(QWidget):
 
         self.pevent_called_times = 0
 
-        self.alphaChannelValuator = Valuator.TangentialPressureValuator
-        self.colorSaturationValuator = Valuator.NoValuator
-        self.lineWidthValuator = Valuator.PressureValuator
+        self.alphaChannelValuator = self.Valuator.TangentialPressureValuator
+        self.colorSaturationValuator = self.Valuator.NoValuator
+        self.lineWidthValuator = self.Valuator.PressureValuator
 
         self.color = Qt.red
         self.pixmap = QPixmap()
@@ -197,32 +197,32 @@ class DSpyqt5Backend(QWidget):
         hValue = int(((event.xTlit() + 60.0) / 120.0) * 255)
 
         v = self.alphaChannelValuator
-        if v is Valuator.PressureValuator:
+        if v is self.Valuator.PressureValuator:
             self.color.setAlphaF(event.pressure())
-        elif v is Valuator.TangentialPressureValuator:
+        elif v is self.Valuator.TangentialPressureValuator:
             if event.device() is QTabletEvent.Airbrush:
                 self.color.setAlphaF(max(0.01, (event.tangentialPressure() + 1.0) / 2.0))
-            else
+            else:
                 self.color.setAlpha(255)
-        elif v is Valuator.TiltValuator:
+        elif v is self.Valuator.TiltValuator:
             self.color.setAlpha(max(abs(vValue - 127), abs(hValue - 127)))
         else:
             self.color.setAlpha(255)
 
         v = self.colorSaturationValuator
-        if v is Valuator.VTiltValuator:
+        if v is self.Valuator.VTiltValuator:
             self.color.setHsv(hue, vValue, value, alpha)
-        elif v is Valuator.HTiltValuator:
+        elif v is self.Valuator.HTiltValuator:
             self.color.setHsv(hue, hValue, value, alpha)
-        elif v is Valuator.PressureValuator:
+        elif v is self.Valuator.PressureValuator:
             self.color.setHsv(hue, int(event.pressure() * 255.0), value, alpha)
         else:
             pass
 
         v = self.lineWidthValuator
-        if v is Valuator.PressureValuator:
+        if v is self.Valuator.PressureValuator:
             self.pen.setWidthF(pressureToWidth(event.pressure()))
-        elif v is Valuator.TiltValuator:
+        elif v is self.Valuator.TiltValuator:
             self.pen.setWidthF(max(abs(vValue - 127), abs(hValue - 127)) / 12)
         else:
             self.pen.setWidthF(1)

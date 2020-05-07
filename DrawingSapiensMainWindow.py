@@ -36,11 +36,13 @@ class DSStartupCheck:
             b.run()
         elif i is self.PYQT5_BACKEND:
             print("pyqt5 is under constructing")
-            app = DSTabletApplication.TabletApplication(sys.argv, sys,args)
+            #app = DSTabletApplication.TabletApplication(sys.argv, sys.args)
+            app = DSTabletApplication.TabletApplication(sys.argv)
             canvas = DSpyqt5Backend()
+            win = DSpyqt5MainWindow.DSpyqt5MainWindow(canvas)
+
             app.setCanvas(canvas)
 
-            win = DSpyqt5MainWindow(canvas)
             win.resize(800, 600)
             win.show()
             app.exec()

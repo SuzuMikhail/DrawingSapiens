@@ -6,6 +6,7 @@ from dsbackend import dspyqt5
 
 class DSpyqt5MainWindow(QMainWindow):
     def __init__(self, canvas):
+        super().__init__()
         self.canvas = canvas
         self.color_dialog = None
 
@@ -55,12 +56,20 @@ class DSpyqt5MainWindow(QMainWindow):
         QMessageBox.about(self, tr("About"), tr("test"))
 
     def create_menus(self):
-        filemenu = menuBar().addMenu(tr("&File"))
-        filemenu.addAction(tr("&Open"), self, self.load, QKeySequence.Open)
-        filemenu.addAction(tr("&Save as"), self, self.save, QKeySequence.SaveAs)
-        filemenu.addAction(tr("&New"), self, self.clear, QKeySequence.New)
-        filemenu.addAction(tr("E&xit"), self, self.close, QKeySequence.Quit)
+        filemenu = self.menuBar().addMenu(self.tr("&File"))
+        """
+        filemenu.addAction(self.tr("&Open"), self, self.load, QKeySequence.Open)
+        filemenu.addAction(self.tr("&Save as"), self, self.save, QKeySequence.SaveAs)
+        filemenu.addAction(self.tr("&New"), self, self.clear, QKeySequence.New)
+        filemenu.addAction(self.tr("E&xit"), self, self.close, QKeySequence.Quit)
+        """
 
-        brush_menu = menuBar().addMenu(tr("&Brush"))
-        brush_menu.addAction(tr("&Brush Color"), this, self.set_brush_color, tr("Ctrl+B"))
+        filemenu.addAction(self.tr("&Open"), self.load, QKeySequence.Open)
+        filemenu.addAction(self.tr("&Save as"), self.save, QKeySequence.SaveAs)
+        filemenu.addAction(self.tr("&New"), self.clear, QKeySequence.New)
+        filemenu.addAction(self.tr("E&xit"), self.close, QKeySequence.Quit)
+        
+
+        brush_menu = self.menuBar().addMenu(self.tr("&Brush"))
+        brush_menu.addAction(self.tr("&Brush Color"), self.set_brush_color, self.tr("Ctrl+B"))
         

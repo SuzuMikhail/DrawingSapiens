@@ -15,3 +15,5 @@
 /dist/DrawingSapiensMainWindow.zip
 /DrawingSapiensMainWindow.spec
 /dsbackend/__pycache__/dspyqt5.cpython-38.pyc
+/__pycache__/DSpyqt5MainWindow.cpython-38.pyc
+/__pycache__/DSTabletApplication.cpython-38.pyc
