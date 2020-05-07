@@ -32,8 +32,8 @@ class DSpyqt5Backend(QWidget):
 
         self.color = Qt.red
         self.pixmap = QPixmap()
-        self.brush = None
-        self.pen = None
+        self.brush = self.color
+        self.pen = QPen(self.brush, 1.0, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin)
 
         self.resize(800, 600)
         self.setAutoFillBackground(True)
@@ -41,18 +41,21 @@ class DSpyqt5Backend(QWidget):
 
     def tabletEvent(self, tevent):
         if tevent.type() == QTabletEvent.TabletPress:
-            self.pen_is_down = True
-            self.event2last_point(tevent)
-            self.text = "TabletPress"
+            if not self.pen_is_down:
+                self.pen_is_down = True
+                self.event2last_point(tevent)
+                self.text = "TabletPress"
         elif tevent.type() == QTabletEvent.TabletMove:
-            self.pen_is_down = True
-            painter = QPainter(self.pixmap)
-            self.paint_pixmap(painter, tevent)
-            self.event2last_point(tevent)
-            self.text = "TabletMove"
+            if self.pen_is_down:
+                self.updateBrush(tevent)
+                painter = QPainter(self.pixmap)
+                self.paint_pixmap(painter, tevent)
+                self.event2last_point(tevent)
+                self.text = "TabletMove"
         elif tevent.type() == QTabletEvent.TabletRelease:
-            self.pen_is_down = False
-            self.text = "TabletRelease"
+            if self.pen_is_down and tevent.buttons() is Qt.NoButton:
+                self.pen_is_down = False
+            self.update()
 
         if self.pen_is_down:
             self.text += " Pen is down"
@@ -63,20 +66,21 @@ class DSpyqt5Backend(QWidget):
 
         self.pevent_called_times += 1
         print(self.pevent_called_times)
+
         tevent.accept()
-        self.update()
+        #self.update()
 
     def paintEvent(self, event):
-        qp = QPainter(self)
-        #qp.begin(self)
         if self.pixmap.isNull():
             self.init_pixmap()
-        
+
+        qp = QPainter(self)
         print('darwing')
-        pixmap_portion = QRect(event.rect().topLeft() * 2,
-                               event.rect().size() * 2)
+        dpr = self.devicePixelRatioF()
+        pixmap_portion = QRect(event.rect().topLeft() * dpr,
+                               event.rect().size() * dpr)
         qp.drawPixmap(event.rect().topLeft(), self.pixmap, pixmap_portion)
-        qp.end()
+        #qp.end()
 
     def resizeEvent(self, event):
         pass
@@ -140,16 +144,35 @@ class DSpyqt5Backend(QWidget):
         print(self.last_point.pos, self.last_point.pressure, self.last_point.rotation)
         
     def paint_pixmap(self, painter, event):
+        maxPenRadius = self.pressureToWidth(1.0)
         painter.setRenderHint(QPainter.Antialiasing)
         
         device = event.device()
 
         if device is QTabletEvent.Airbrush:
             painter.setPen(Qt.NoPen)
-            painter.drawEllipse(event.posF(), 20, 20)
-            self.update(QRect(event.pos() - QPoint(20, 20), QSize(40, 40)))
+            grad = QRadialGradient(self.last_point.pos, self.pen.widthF() * 10.0)
+            color = self.brush.color()
+            color.setAlphaF(color.alphaF() * 0.25)
+            grad.setColorAt(0, self.brush.color())
+            grad.setColorAt(0.5, Qt.transparent)
+            painter.setBrush(grad)
+            radius = grad.radius()
+            painter.drawEllipse(event.posF(), radius, radius)
+            self.update(QRect(event.pos() - QPoint(radius, radius), QSize(radius * 2, radius * 2)))
         elif device is QTabletEvent.RotationStylus:
-            print("rotationStylus")
+            self.brush.setStyle(Qt.SolidPattern)
+            painter.setPen(Qt.NoPen)
+            painter.setBrush(self.brush)
+            poly = QPolygonF()
+            halfWidth = self.pressureToWidth(self.last_point.pressure)
+            brushAdjust = QPointF(qSin(qDegressToRadians(-self.last_point.rotation)) * halfWidth,
+                                  qCos(qDegressToRadians(-self.last_point.rotation)) * halfWidth)
+            
+            poly << self.last_point.pos + brushAdjust
+            poly << self.last_point.pos - brushAdjust
+
+            halfWidth = self.pen.widthF()
         else:
             painter.setPen(Qt.NoPen)
             painter.drawLine(self.last_point.pos, event.posF())
