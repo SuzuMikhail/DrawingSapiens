@@ -173,18 +173,69 @@ class DSpyqt5Backend(QWidget):
             poly << self.last_point.pos - brushAdjust
 
             halfWidth = self.pen.widthF()
+            brushAdjust = QPointF(qSin(qDegressToRadians(-event.rotation())) * halfWidth,
+                                  qCos(qDegressToRadians(-event.rotation())) * halfWidth)
+
+            poly << event.posF() - brushAdjust
+            poly << event.posF() + brushAdjust
+            painter.drawConvexPolygon(poly)
+            self.update(poly.boundingRect.toRect())
         else:
             painter.setPen(Qt.NoPen)
             painter.drawLine(self.last_point.pos, event.posF())
-            #update(QRect(self.last_point.pos.toPoint(), event.pos()).normalized().adjusted())
-            self.update()
-            #print("unknown devices")
-    
+            self.update(QRect(self.last_point.pos.toPoint(), event.pos().normalized()
+                        .adjusted(-maxPenRadius, -maxPenRadius, maxPenRadius, maxPenRadius)))
+                
     def brushPattern(self, value):
         pass
 
     def updateBrush(self, event):
-        pass
+        hue, saturation, value, alpha = None
+        self.color.getHsv(hue, saturation, value, alpha)
+
+        vValue = int(((event.yTlit() + 60.0) / 120.0) * 255)
+        hValue = int(((event.xTlit() + 60.0) / 120.0) * 255)
+
+        v = self.alphaChannelValuator
+        if v is Valuator.PressureValuator:
+            self.color.setAlphaF(event.pressure())
+        elif v is Valuator.TangentialPressureValuator:
+            if event.device() is QTabletEvent.Airbrush:
+                self.color.setAlphaF(max(0.01, (event.tangentialPressure() + 1.0) / 2.0))
+            else
+                self.color.setAlpha(255)
+        elif v is Valuator.TiltValuator:
+            self.color.setAlpha(max(abs(vValue - 127), abs(hValue - 127)))
+        else:
+            self.color.setAlpha(255)
+
+        v = self.colorSaturationValuator
+        if v is Valuator.VTiltValuator:
+            self.color.setHsv(hue, vValue, value, alpha)
+        elif v is Valuator.HTiltValuator:
+            self.color.setHsv(hue, hValue, value, alpha)
+        elif v is Valuator.PressureValuator:
+            self.color.setHsv(hue, int(event.pressure() * 255.0), value, alpha)
+        else:
+            pass
+
+        v = self.lineWidthValuator
+        if v is Valuator.PressureValuator:
+            self.pen.setWidthF(pressureToWidth(event.pressure()))
+        elif v is Valuator.TiltValuator:
+            self.pen.setWidthF(max(abs(vValue - 127), abs(hValue - 127)) / 12)
+        else:
+            self.pen.setWidthF(1)
+
+        if event.pointerType() is QTabletEvent.Eraser:
+            self.brush.setColor(Qt.white)
+            self.pen.setColor(Qt.white)
+            self.pen.setWidthF(event.pressure() * 10 + 1)
+        else:
+            self.brush.setColor(self.color)
+            self.pen.setColor(self.color)
+
+
 
     def updateCursor(self, event):
         pass

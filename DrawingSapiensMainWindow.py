@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import *
 from dsbackend.dspyglet import DSpygletBackend
 from dsbackend.dspyqt5 import DSpyqt5Backend
 import DSpyqt5MainWindow
+import DSTabletApplication
 
 
 class DSStartupCheck:
@@ -35,11 +36,14 @@ class DSStartupCheck:
             b.run()
         elif i is self.PYQT5_BACKEND:
             print("pyqt5 is under constructing")
-            canvas = DSpyqt5Backend
+            app = DSTabletApplication.TabletApplication(sys.argv, sys,args)
+            canvas = DSpyqt5Backend()
+            app.setCanvas(canvas)
+
             win = DSpyqt5MainWindow(canvas)
             win.resize(800, 600)
             win.show()
-            
+            app.exec()
         else:
             print("No backend have been chosed.")
 
