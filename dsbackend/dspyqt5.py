@@ -25,14 +25,15 @@ class DSpyqt5Backend(QWidget):
         self.last_point = self.Point()
 
         self.pevent_called_times = 0
+        self.text = ""
 
         self.alphaChannelValuator = self.Valuator.TangentialPressureValuator
         self.colorSaturationValuator = self.Valuator.NoValuator
         self.lineWidthValuator = self.Valuator.PressureValuator
 
-        self.color = Qt.red
+        self.color = QColor(Qt.red)
         self.pixmap = QPixmap()
-        self.brush = self.color
+        self.brush = QBrush(self.color)
         self.pen = QPen(self.brush, 1.0, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin)
 
         self.resize(800, 600)
@@ -57,15 +58,7 @@ class DSpyqt5Backend(QWidget):
                 self.pen_is_down = False
             self.update()
 
-        if self.pen_is_down:
-            self.text += " Pen is down"
-        else:
-            self.text += " Pen is up"
-
         print(self.text)
-
-        self.pevent_called_times += 1
-        print(self.pevent_called_times)
 
         tevent.accept()
         #self.update()
@@ -183,18 +176,29 @@ class DSpyqt5Backend(QWidget):
         else:
             painter.setPen(Qt.NoPen)
             painter.drawLine(self.last_point.pos, event.posF())
-            self.update(QRect(self.last_point.pos.toPoint(), event.pos().normalized()
-                        .adjusted(-maxPenRadius, -maxPenRadius, maxPenRadius, maxPenRadius)))
+            self.update(QRect(self.last_point.pos.toPoint(), event.pos()).normalized()
+                        .adjusted(-maxPenRadius, -maxPenRadius, maxPenRadius, maxPenRadius))
                 
     def brushPattern(self, value):
         pass
 
-    def updateBrush(self, event):
-        hue, saturation, value, alpha = None
-        self.color.getHsv(hue, saturation, value, alpha)
+    def pressureToWidth(self, pressure):
+        return pressure * 10 + 1
 
-        vValue = int(((event.yTlit() + 60.0) / 120.0) * 255)
-        hValue = int(((event.xTlit() + 60.0) / 120.0) * 255)
+    def updateBrush(self, event):
+        #hue, saturation, value, alpha = 0
+        #hue = saturation = value = alpha = 0
+        hue = saturation = value = alpha = self.color.getHsv()
+
+        #self.color.getHsv(hue, saturation, value, alpha)
+        
+        ytilt = event.yTilt()
+        xtilt = event.xTilt()
+
+        #vValue = int(((event.yTlit() + 60.0) / 120.0) * 255)
+        #hValue = int(((event.xTlit() + 60.0) / 120.0) * 255)
+        vValue = int(((ytilt + 60.0) / 120.0) * 255)
+        hValue = int(((xtilt + 60.0) / 120.0) * 255)
 
         v = self.alphaChannelValuator
         if v is self.Valuator.PressureValuator:
@@ -221,7 +225,7 @@ class DSpyqt5Backend(QWidget):
 
         v = self.lineWidthValuator
         if v is self.Valuator.PressureValuator:
-            self.pen.setWidthF(pressureToWidth(event.pressure()))
+            self.pen.setWidthF(self.pressureToWidth(event.pressure()))
         elif v is self.Valuator.TiltValuator:
             self.pen.setWidthF(max(abs(vValue - 127), abs(hValue - 127)) / 12)
         else:

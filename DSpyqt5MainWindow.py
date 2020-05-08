@@ -18,10 +18,15 @@ class DSpyqt5MainWindow(QMainWindow):
 
     def set_brush_color(self):
         if not self.color_dialog:
+            # Under constructing
             self.color_dialog = QColorDialog(self)
-            self.color_dialog.setModal(false)
-            self.color_dialog.setCurrentColor(self.canvas.color())
-            connect(self.color_dialog, QColorDialog.colorSelected, self.canvas, dspyqt5.setColor)
+            self.color_dialog.setModal(False)
+            #self.color_dialog.setCurrentColor(self.canvas.color())
+            self.color_dialog.setCurrentColor(self.canvas.color)
+            #connect(self.color_dialog, QColorDialog.colorSelected, self.canvas, dspyqt5.setColor)
+            #self.connect(self.color_dialog, QColorDialog.colorSelected, self.canvas, dspyqt5.setColor)
+            #pyqtSignal().connect(self.color_dialog, QColorDialog.colorSelected, self.canvas, dspyqt5.setColor)
+            #self.color_dialog.returnPressed.connect()
         self.color_dialog.setVisible(True)
 
     def set_alpha_valuator(self, action):
@@ -38,14 +43,14 @@ class DSpyqt5MainWindow(QMainWindow):
 
     def save(self):
         path = QDir.currentPath() + "/Untitled.png"
-        filename = QFileDialog.getSaveFileName(self, tr("Save Picture"), path)
+        filename = QFileDialog.getSaveFileName(self, self.tr("Save Picture"), path)
         success = self.canvas.save_image(filename)
         if not success:
             QMessageBox.information(self, "Error", "Could not save the image")
         return success
 
     def load(self):
-        filename = QFileDialog.getOpenFileName(this, tr("Open file"), QDir.currentPath)
+        filename = QFileDialog.getOpenFileName(self, self.tr("Open file"), QDir.currentPath)
         if not self.canvas.load_image(filename):
             QMessageBox.information(self, "Error", "Could not load the image")
 

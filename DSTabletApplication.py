@@ -13,7 +13,7 @@ class TabletApplication(QApplication):
             self.canvas.setTabletDevice(event)
             return True
         #return QApplication.event(event)
-        return super.event(event)
+        return super().event(event)
 
     def setCanvas(self, canvas):
         self.canvas = canvas
